@@ -13,6 +13,7 @@ import { polygonAmoy } from "viem/chains";
 /*@ts-ignore*/
 import { EthereumWalletConnectors, } from "@dynamic-labs/ethereum";
 import { ZeroDevSmartWalletConnectors } from "@dynamic-labs/ethereum-aa";
+import { Toaster } from "react-hot-toast";
 
 const config = createConfig({
   chains: [polygonAmoy],
@@ -38,6 +39,7 @@ export default function Provider({
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>
+          <Toaster/>
             {children}
           </DynamicWagmiConnector>
         </QueryClientProvider>

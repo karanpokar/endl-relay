@@ -9,6 +9,8 @@ import { DynamicWidget, useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { isEthereumWallet } from "@dynamic-labs/ethereum";
 import OtpComponent from "./OTPComponent";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { isValidEvmAddress } from "@/components/utils/regex";
 
 export const SendTransactionSection: FC = () => {
   const { primaryWallet }: any = useDynamicContext();
@@ -20,26 +22,35 @@ export const SendTransactionSection: FC = () => {
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
+    try {
+      const formData = new FormData(event.currentTarget);
 
-    const formData = new FormData(event.currentTarget);
+      const address = formData.get("address") as string;
+      const amount = formData.get("amount") as string;
 
-    const address = formData.get("address") as string;
-    const amount = formData.get("amount") as string;
+      if(!isValidEvmAddress(address)){
+        toast('Invalid EVM Address')
+        return
+      }
 
-    const publicClient = await primaryWallet.getPublicClient();
-    const walletClient = await primaryWallet.getWalletClient();
+      const publicClient = await primaryWallet.getPublicClient();
+      const walletClient = await primaryWallet.getWalletClient();
 
-    const transaction: any = {
-      to: address,
-      value: amount ? parseEther(amount) : undefined,
-    };
+      const transaction: any = {
+        to: address,
+        value: amount ? parseEther(amount) : undefined,
+      };
 
-    const hash: any = await walletClient.sendTransaction(transaction);
-
-    const receipt = await publicClient.getTransactionReceipt({
-      hash,
-    });
-    setTxnHash(receipt?.transactionHash);
+      const hash: any = await walletClient.sendTransaction(transaction);
+      toast.success("Transaction Sent Successfully");
+      const receipt = await publicClient.getTransactionReceipt({
+        hash,
+      });
+      setTxnHash(receipt?.transactionHash);
+    } catch (err) {
+      console.log("Err");
+      toast("Transaction Failed");
+    }
 
     //console.log(receipt);
   };

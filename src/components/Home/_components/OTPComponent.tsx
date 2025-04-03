@@ -1,14 +1,13 @@
-'use client'
+"use client";
 
 import React, { useState } from "react";
 /*@ts-ignore*/
-import OTPInput, { ResendOTP } from "otp-input-react";
+import OTPInput from "otp-input-react";
 
 export default function OtpComponent({ setVerified }: any) {
   const [OTP, setOTP] = useState("");
 
   const submit = async () => {
-    //console.log('OTP',OTP)
     if (OTP == "4321") {
       setTimeout(() => {
         setVerified(true);
