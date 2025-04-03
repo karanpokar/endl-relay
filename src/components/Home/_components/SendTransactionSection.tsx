@@ -15,6 +15,7 @@ import { isValidEvmAddress } from "@/components/utils/regex";
 export const SendTransactionSection: FC = () => {
   const { primaryWallet }: any = useDynamicContext();
   const [verified, setVerified] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const [txnHash, setTxnHash] = useState("");
 
@@ -28,9 +29,9 @@ export const SendTransactionSection: FC = () => {
       const address = formData.get("address") as string;
       const amount = formData.get("amount") as string;
 
-      if(!isValidEvmAddress(address)){
-        toast('Invalid EVM Address')
-        return
+      if (!isValidEvmAddress(address)) {
+        toast("Invalid EVM Address");
+        return;
       }
 
       const publicClient = await primaryWallet.getPublicClient();
@@ -43,10 +44,13 @@ export const SendTransactionSection: FC = () => {
 
       const hash: any = await walletClient.sendTransaction(transaction);
       toast.success("Transaction Sent Successfully");
+      
       const receipt = await publicClient.getTransactionReceipt({
         hash,
       });
       setTxnHash(receipt?.transactionHash);
+      setSent(false)
+      setVerified(false)
     } catch (err) {
       console.log("Err");
       toast("Transaction Failed");
@@ -54,6 +58,9 @@ export const SendTransactionSection: FC = () => {
 
     //console.log(receipt);
   };
+
+
+  
 
   return (
     <div className="flex flex-col items-center h-[100%] pt-[20px] justify-start w-[100%]">
@@ -82,7 +89,7 @@ export const SendTransactionSection: FC = () => {
           required
           placeholder="0.05"
         />
-        {verified ? (
+        {verified && sent ? (
           <button
             className="bg-[blue] h-[44px] my-[12px] w-[100%] mt-[40px] rounded-[12px]"
             type="submit"
@@ -95,9 +102,24 @@ export const SendTransactionSection: FC = () => {
 
         {/* <span data-testid="transaction-section-result-hash">{txnHash}</span> */}
       </form>
+
       <div className="w-[90%] flex flex-col items-center justify-center">
-        {!verified && <OtpComponent setVerified={setVerified} />}
+        {!verified && sent && <OtpComponent setVerified={setVerified} />}
       </div>
+
+      {!sent && !verified && (
+        <div className="w-[90%] flex flex-col items-center justify-center">
+          <button
+            onClick={() => {
+              setSent(true);
+            }}
+            className="bg-[blue] h-[44px] my-[12px] w-[100%] mt-[40px] rounded-[12px]"
+          >
+            Send OTP
+          </button>
+        </div>
+      )}
+
       <div className="w-[90%] my-[20px] flex flex-col items-center justify-center">
         {txnHash && (
           <Link
